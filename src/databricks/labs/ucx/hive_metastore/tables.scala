@@ -10,7 +10,7 @@ import org.apache.spark.sql.functions.{col,lower,upper}
 
 // must follow the same structure as databricks.labs.ucx.hive_metastore.tables.Table
 case class TableDetails(catalog: String, database: String, name: String, object_type: String,
-                        table_format: String, location: String, view_text: String, upgraded_to: String, storage_properties: String)
+                        table_format: String, location: String, view_text: String, upgraded_to: String, storage_properties: String, is_partitioned: Boolean)
 
 // recording error log in the database
 case class TableError(catalog: String, database: String, name: String, error: String)
@@ -51,10 +51,15 @@ def metadataForAllTables(databases: Seq[String], queue: ConcurrentLinkedQueue[Ta
               else
                 s"$key=$value"
           }.mkString("[", ", ", "]")
+          
+          // Note: sharedState.externalCatalog does not expose accurate partition metadata, so it forced us to use sessionState.catalog instead
+          val partitionColumnNames = spark.sessionState.catalog.getTableMetadata(TableIdentifier(tableName, Some(databaseName))).partitionColumnNames
+          val isPartitioned = !partitionColumnNames.isEmpty
+
 
           Some(TableDetails("hive_metastore", databaseName, tableName, table.tableType.name, table.provider.orNull,
             table.storage.locationUri.map(_.toString).orNull, table.viewText.orNull,
-            upgraded_to match { case Some(target) => target case None => null }, formattedString))
+            upgraded_to match { case Some(target) => target case None => null }, formattedString, isPartitioned))
         }
       } catch {
         case err: Throwable =>
