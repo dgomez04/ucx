@@ -7,6 +7,8 @@ import org.apache.spark.sql.catalyst.analysis.NoSuchDatabaseException
 import org.apache.spark.sql.catalyst.catalog.{CatalogTable, CatalogTableType}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col,lower,upper}
+import org.apache.spark.sql.catalyst.TableIdentifier
+
 
 // must follow the same structure as databricks.labs.ucx.hive_metastore.tables.Table
 case class TableDetails(catalog: String, database: String, name: String, object_type: String,
