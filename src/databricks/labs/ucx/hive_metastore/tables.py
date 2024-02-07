@@ -39,7 +39,6 @@ class Table:
     storage_properties: str | None = None
     is_partitioned: bool | None = None
 
-
     DBFS_ROOT_PREFIXES: typing.ClassVar[list[str]] = [
         "/dbfs/",
         "dbfs:/",
@@ -60,8 +59,6 @@ class Table:
         if self.table_format is None:
             return False
         return self.table_format.upper() == "DELTA"
-
-
 
     @property
     def key(self) -> str:
@@ -256,7 +253,7 @@ class TablesCrawler(CrawlerBase):
                     "upgraded_to", None
                 ),
                 storage_properties=self._parse_table_props(describe.get("Storage Properties", "").lower()),  # type: ignore[arg-type]
-                is_partitioned= "#Partition Information" in describe
+                is_partitioned="#Partition Information" in describe,
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             # TODO: https://github.com/databrickslabs/ucx/issues/406
